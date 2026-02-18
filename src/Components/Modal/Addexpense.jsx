@@ -83,7 +83,7 @@ export default function Addexpense({setIsOpenModal, setBalance, balance, setExpe
         date: transaction.date
       })
     }
-  }, editExpenseId);
+  }, [editExpenseId, expenseList]); 
 
   return (
     <div className={styles.modal_wrapper}>

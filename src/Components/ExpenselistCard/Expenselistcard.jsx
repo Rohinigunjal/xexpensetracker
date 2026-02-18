@@ -3,7 +3,7 @@ import { CiRollingSuitcase, CiPizza } from "react-icons/ci";
 import { TiDeleteOutline } from "react-icons/ti";
 import { GrFormEdit } from "react-icons/gr";
 import { FiGift } from "react-icons/fi";
-import { useEffect } from "react";
+//import { useEffect } from "react";
 
  const Expenselistcard = ({transactioninfo, handleDelete, handleEdit}) => {
 
