@@ -1,133 +1,200 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+const expenseCategories = ['Food', 'Transport', 'Shopping', 'Entertainment', 'Bills', 'Other'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 function App() {
-  const [walletBalance, setWalletBalance] = React.useState(5000);
+  const [walletBalance, setWalletBalance] = useState(5000);
+  const [expenses, setExpenses] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ title: '', amount: '', category: 'Other', date: '' });
+  const [editId, setEditId] = useState(null);
 
-  const [expenses, setExpenses] = React.useState(
-    JSON.parse(localStorage.getItem("expenses")) || []
-  );
+  useEffect(() => {
+    const saved = localStorage.getItem('expenses');
+    if (saved) {
+      const loadedExpenses = JSON.parse(saved);
+      setExpenses(loadedExpenses);
+      const totalSpent = loadedExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+      setWalletBalance(5000 - totalSpent);
+    }
+  }, []);
 
-  const [title, setTitle] = React.useState("");
-  const [price, setPrice] = React.useState("");
-  const [category, setCategory] = React.useState("");
-  const [date, setDate] = React.useState("");
-
-  const [incomeAmount, setIncomeAmount] = React.useState("");
-
-  // Save expenses to localStorage
-  React.useEffect(() => {
-    localStorage.setItem("expenses", JSON.stringify(expenses));
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+    const totalSpent = expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+    setWalletBalance(5000 - totalSpent);
   }, [expenses]);
 
-  // Handle Add Income
-  const handleAddIncome = (e) => {
-    e.preventDefault();
-
-    if (!incomeAmount) return;
-
-    setWalletBalance(walletBalance + Number(incomeAmount));
-    setIncomeAmount("");
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle Add Expense
-  const handleAddExpense = (e) => {
+  const validateForm = () => {
+    return formData.title.trim() && formData.amount > 0 && formData.category && formData.date;
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
-    if (!title || !price || !category || !date) return;
-
-    if (Number(price) > walletBalance) {
-      alert("Insufficient balance");
-      return;
-    }
-
-    const newExpense = {
-      id: Date.now(),
-      title,
-      price: Number(price),
-      category,
-      date,
+    const expense = {
+      id: editId || Date.now(),
+      ...formData,
+      amount: parseFloat(formData.amount)
     };
 
-    setExpenses([...expenses, newExpense]);
-    setWalletBalance(walletBalance - Number(price));
-
-    setTitle("");
-    setPrice("");
-    setCategory("");
-    setDate("");
+    if (editId) {
+      setExpenses(expenses.map(exp => exp.id === editId ? expense : exp));
+      setEditId(null);
+    } else {
+      setExpenses([...expenses, expense]);
+    }
+    setFormData({ title: '', amount: '', category: 'Other', date: '' });
+    setShowForm(false);
   };
 
+  const handleEdit = (expense) => {
+    setFormData(expense);
+    setEditId(expense.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = (id) => {
+    setExpenses(expenses.filter(exp => exp.id !== id));
+  };
+
+  const pieData = expenseCategories.map(cat => {
+    const total = expenses.filter(exp => exp.category === cat).reduce((sum, exp) => sum + exp.amount, 0);
+    return { name: cat, value: total };
+  }).filter(d => d.value > 0);
+
+  const barData = expenses
+    .slice(-7)
+    .reduce((acc, exp) => {
+      const date = new Date(exp.date).toLocaleDateString();
+      acc[date] = (acc[date] || 0) + exp.amount;
+      return acc;
+    }, {});
+
+  const trendData = Object.entries(barData).map(([name, value]) => ({ name, value })).reverse();
+
   return (
-    <div>
-      <h1>Expense Tracker</h1>
+    <div className="container">
+      <div className="wallet-balance">
+        <h2>Wallet Balance</h2>
+        <h1>₹{walletBalance.toLocaleString()}</h1>
+        <button className="add-expense-btn" onClick={() => { setShowForm(true); setEditId(null); }}>
+          + Add Expense
+        </button>
+      </div>
 
-      <h2>Wallet Balance: ₹{walletBalance.toFixed(2)}</h2>
+      {showForm && (
+        <div className="form-container">
+          <h3>{editId ? 'Edit Expense' : 'Add Expense'}</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label>Title</label>
+              <input
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="e.g. Grocery shopping"
+                required
+              />
+            </div>
+            <div className="input-group">
+              <label>Amount (₹)</label>
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleInputChange}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div className="input-group">
+              <label>Category</label>
+              <select name="category" value={formData.category} onChange={handleInputChange}>
+                {expenseCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            <div className="input-group">
+              <label>Date</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <button type="submit" className="submit-btn" disabled={!validateForm()}>
+              {editId ? 'Update' : 'Add Expense'}
+            </button>
+          </form>
+        </div>
+      )}
 
-      {/* Buttons */}
-      <button type="button">+ Add Income</button>
-      <button type="button">+ Add Expense</button>
-
-      {/* Add Income Form */}
-      <form onSubmit={handleAddIncome}>
-        <input
-          type="number"
-          placeholder="Income Amount"
-          value={incomeAmount}
-          onChange={(e) => setIncomeAmount(e.target.value)}
-        />
-        <button type="submit">Add Balance</button>
-      </form>
-
-      {/* Add Expense Form */}
-      <form onSubmit={handleAddExpense}>
-        <input
-          type="text"
-          name="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Expense Title"
-        />
-
-        <input
-          type="number"
-          name="price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          placeholder="Expense Amount"
-        />
-
-        <select
-          name="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">Select Category</option>
-          <option value="Food">Food</option>
-          <option value="Travel">Travel</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Entertainment">Entertainment</option>
-        </select>
-
-        <input
-          type="date"
-          name="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-
-        <button type="submit">Add Expense</button>
-      </form>
-
-      {/* Expense List */}
-      <h3>Expense List</h3>
-      <ul>
-        {expenses.map((expense) => (
-          <li key={expense.id}>
-            {expense.title} - ₹{expense.price} - {expense.category} -{" "}
-            {expense.date}
-          </li>
+      <div className="expense-list">
+        <h3>Recent Expenses ({expenses.length})</h3>
+        {expenses.slice(-5).map(expense => (
+          <div key={expense.id} className="expense-item">
+            <div>
+              <strong>{expense.title}</strong>
+              <div className="expense-meta">
+                {expense.category} • {new Date(expense.date).toLocaleDateString()} • ₹{expense.amount.toFixed(2)}
+              </div>
+            </div>
+            <div className="expense-actions">
+              <button className="edit-btn" onClick={() => handleEdit(expense)}>Edit</button>
+              <button className="delete-btn" onClick={() => handleDelete(expense.id)}>Delete</button>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
+
+      <div className="charts-container">
+        <div className="chart-wrapper">
+          <h4>Expense Summary (Pie)</h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                dataKey="value"
+                nameKey="name"
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="chart-wrapper">
+          <h4>Trends (Bar - Last 7 days)</h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }
