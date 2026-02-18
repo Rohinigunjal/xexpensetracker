@@ -36,7 +36,7 @@ export default function Transactions({expenseListprop, setExpenseListprop, balan
   const handleDeletetransaction = (idTodel) => {
       const transactionTodel = expenseListprop.find(t => t.id === idTodel)
       setBalanceprop(prev => prev+Number(transactionTodel.price));
-      setExpenseListprop(prev => (prev.filter(expenses => expenses.id != idTodel)
+      setExpenseListprop(prev => (prev.filter(expenses => expenses.id !== idTodel)
     ))
   }
   
