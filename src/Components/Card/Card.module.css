@@ -1,0 +1,40 @@
+.card{
+  background-color: var(--secondary-bg-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);  
+}
+
+.card_title{
+  color: #ffffff;
+    font-weight: 400;
+  font-size: 30px;
+  margin-bottom: 10px;  
+}
+
+.card_title span{
+  font-weight: 700;
+}
+
+.pass{
+  color: #9DFF58;
+}
+
+.fail{
+  color: #F4BB4A;
+}
+
+@media(max-width:767px){
+  .card{
+    padding: 35px 10px;
+  }
+
+  .card_title{
+    font-size: 24px;
+  }
+}

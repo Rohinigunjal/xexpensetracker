@@ -1,0 +1,15 @@
+.transaction_sec .txtclr{
+  color: #fff;
+}
+
+.transaction_sec h2{
+  color: #fff;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.transaction_list{
+  background: #fff;
+  border-radius: 15px;
+  padding: 10px 20px;
+}

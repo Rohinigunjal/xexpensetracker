@@ -1,0 +1,84 @@
+.expenselist_section{  
+  display: flex;     
+  justify-content: space-between;
+  align-items: center;  
+  padding: 10px;
+  margin-top: 10px;   
+}
+
+ .expenselist_section .inner_layout{
+  display: flex;   
+  align-items: center;
+  gap: 20px;
+  
+}
+
+
+h4{
+  margin-right: 12px;
+  font-family: sans-serif;
+  color: #F4BB4A;
+}
+
+.transaction_title, .transaction_date{
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  margin-top: 10px;  
+  text-align: left;
+}
+
+
+.transaction_date{  
+  color: rgba(155, 155, 155, 1); 
+}
+.category_icon{
+  width: 35px;
+  height: 35px;  
+  background: rgba(217, 217, 217, 1);
+  border-radius: 50%;
+  padding: 8px;
+  font-size: 1.3rem;
+}
+
+
+.del_icon{  
+  background: rgb(255,62,62); 
+}
+
+.edit_icon{  
+  background: rgb(244, 187, 74);  
+  }
+
+.expenselist_section .inner_layout button{
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  border-radius: 40%;
+  padding: 4px;
+  font-size: 1.8rem;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.btn{
+  display: flex;
+  gap:10px;
+}
+
+  @media(max-width:767px){
+    .expenselist_section{  
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px      
+      }     
+     
+
+    .inner_layout:last-child{
+      margin-left: 3.5rem;
+      width:80%;
+      justify-content: space-between;      
+    }  
+  } 
